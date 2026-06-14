@@ -161,6 +161,8 @@
         throw new Error(await response.text());
       }
 
+      alert("Transaction has been added successfully.");
+      
       closeModal();
     } catch (error) {
       console.error(error);
