@@ -23,12 +23,6 @@ export async function POST({ request, cookies }) {
     return json({ error: "User not found. " }, { status: 404 });
   }
 
-  const authUser: AuthUser = {
-    email: user.email,
-    name: user.name,
-    committee: user.committee,
-  };
-
   setSession(cookies, user);
 
   return json({
