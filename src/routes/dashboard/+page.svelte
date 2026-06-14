@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
 
   type Stats = {
@@ -69,7 +70,23 @@
     }
   }
 
-  onMount(loadDashboard);
+  onMount(() => {
+    loadDashboard();
+
+    const es = new EventSource("/api/events");
+
+    es.onmessage = () => {
+      loadDashboard();
+    };
+
+    es.onerror = (err) => {
+      console.error("SSE error:", err);
+    };
+
+    return () => {
+      es.close();
+    };
+  });
 </script>
 
 <div class="min-h-screen bg-[#fff7f7] text-gray-800 flex">
@@ -100,7 +117,7 @@
     <nav class="space-y-2 text-sm">
       {#each navItems as item}
         <a
-          onclick={() => setActiveNav(item.key)}
+          onclick={() => goto(`./${item.key}`)}
           class={`block px-3 py-2 rounded-lg hover:cursor-pointer transition border border-transparent
             ${
               activeNav === item.key
@@ -143,6 +160,7 @@
         </div>
 
         <button
+          onclick={() => goto("/pos")}
           class="bg-[#b91c1c] hover:bg-[#991b1b] hover:cursor-pointer text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm shadow"
         >
           + New Transaction
@@ -228,7 +246,7 @@
               </thead>
 
               <tbody>
-                {#each transactions as tx}
+                {#each transactions.slice(0, 15) as tx}
                   <tr class="border-b border-red-50">
                     <td class="py-2">{tx.description}</td>
                     <td class="capitalize">{tx.method}</td>
