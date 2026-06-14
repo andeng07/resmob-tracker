@@ -86,6 +86,7 @@
   let showMechanics = $state(false);
   let photoboothPeopleCount = $state(1);
   let isCanShootPromoBundle = $state(false);
+  let paymentMethod = $state<"cash" | "cashless">("cash");
 
   // Flat reactive total logic
   let total = $derived.by(() => {
@@ -103,6 +104,10 @@
   let change = $derived(safeCash - total);
   let isCashInsufficient = $derived(safeCash < total);
 
+  let isDisabled = $derived.by(() => {
+    return paymentMethod === "cash" && isCashInsufficient;
+  });
+
   // --- HANDLERS ---
   function openService(service: Service) {
     selected = service;
@@ -110,6 +115,7 @@
     showMechanics = false;
     photoboothPeopleCount = 1;
     isCanShootPromoBundle = false;
+    paymentMethod = "cash";
   }
 
   function closeModal() {
@@ -117,7 +123,8 @@
   }
 
   async function confirmTransaction() {
-    if (!selected || isCashInsufficient || !user) return;
+    if (!selected || !user || (paymentMethod === "cash" && isCashInsufficient))
+      return;
 
     let description = selected.name;
 
@@ -139,16 +146,19 @@
     };
 
     try {
+      const isCash = paymentMethod === "cash";
+
       const response = await fetch("/api/transactions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          method: "cash",
+          method: paymentMethod,
           amount: total,
-          paid: safeCash,
-          change: safeCash - total,
+
+          paid: isCash ? safeCash : total,
+          change: isCash ? Math.max(safeCash - total, 0) : 0,
 
           activity: activityMap[selected.id],
           description,
@@ -162,7 +172,7 @@
       }
 
       alert("Transaction has been added successfully.");
-      
+
       closeModal();
     } catch (error) {
       console.error(error);
@@ -332,7 +342,39 @@
         <div class="space-y-1.5">
           <label
             class="text-[10px] font-black text-amber-700 uppercase tracking-widest"
-            for="cash-input">Cash Given</label
+          >
+            Payment Method
+          </label>
+
+          <div class="grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              class="h-10 border-2 rounded-lg text-xs font-black transition
+                {paymentMethod === 'cash'
+                ? 'border-red-600 bg-red-600 text-white'
+                : 'border-amber-100 text-slate-600 bg-white hover:bg-amber-50/50'}"
+              onclick={() => (paymentMethod = "cash")}
+            >
+              CASH
+            </button>
+
+            <button
+              type="button"
+              class="h-10 border-2 rounded-lg text-xs font-black transition
+                {paymentMethod === 'cashless'
+                ? 'border-red-600 bg-red-600 text-white'
+                : 'border-amber-100 text-slate-600 bg-white hover:bg-amber-50/50'}"
+              onclick={() => (paymentMethod = "cashless")}
+            >
+              CASHLESS
+            </button>
+          </div>
+        </div>
+
+        <div hidden={paymentMethod === "cashless"} class="space-y-1.5">
+          <label
+            class="text-[10px] font-black text-amber-700 uppercase tracking-widest"
+            for="cash-input">Money Given</label
           >
           <div class="relative flex items-center">
             <span
@@ -377,15 +419,13 @@
           <button
             type="button"
             class="w-full h-11 rounded-lg font-black text-xs tracking-wider uppercase transition-all shadow-sm
-              {isCashInsufficient
+              {isDisabled
               ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
               : 'bg-amber-500 hover:bg-amber-600 active:translate-y-0.5 text-slate-950 border-b-4 border-amber-700'}"
-            disabled={isCashInsufficient}
+            disabled={isDisabled}
             onclick={confirmTransaction}
           >
-            {isCashInsufficient
-              ? "★ Awaiting Payment ★"
-              : "★ Dispatch Transaction ★"}
+            {isDisabled ? "★ Awaiting Payment ★" : "★ Dispatch Transaction ★"}
           </button>
 
           <button
