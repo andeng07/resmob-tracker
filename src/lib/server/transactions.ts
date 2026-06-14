@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { events } from "$lib/server/events";
 import { db } from "./db";
 
 export type Activity =
@@ -56,6 +57,8 @@ export async function createTransaction(
     createdAt: new Date(),
   });
 
+  events.emit("transactions:updated");
+
   return result.insertedId;
 }
 
@@ -103,6 +106,9 @@ export async function getTransactionsByFilters(
 
 export async function deleteTransaction(id: ObjectId): Promise<boolean> {
   const result = await transactions.deleteOne({ _id: id });
+
+  events.emit("transactions:updated");
+
   return result.deletedCount > 0;
 }
 
