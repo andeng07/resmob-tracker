@@ -6,7 +6,7 @@
   };
 
   let revenue = $state(0);
-  let target = 100000;
+  let target = 25000;
   let loading = $state(true);
   let transactions = $state<Transaction[]>([]);
 
