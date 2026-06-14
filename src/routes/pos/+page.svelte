@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
   import type { AuthUser } from "$lib/server/auth";
   import type { Activity } from "$lib/server/transactions";
   import type { PageData } from "../$types";
@@ -186,18 +187,26 @@
 >
   <div class="max-w-4xl mx-auto relative z-10">
     <header
-      class="mb-8 border-b-4 border-double border-red-600 pb-5 text-center"
+      class="mb-8 border-b-4 border-double border-red-600 pb-5 text-center relative"
     >
       <h1
         class="text-4xl font-black tracking-wider text-red-600 drop-shadow-sm uppercase"
       >
         Dear Amanah
       </h1>
+
       <p
         class="text-xs font-bold tracking-widest text-amber-600 uppercase mt-1"
       >
         ★ Point of Sales ★
       </p>
+
+      <button
+        class="absolute right-0 top-0 text-xs font-bold px-3 py-1 border border-red-500 text-red-600 rounded hover:bg-red-50"
+        onclick={() => goto("./dashboard")}
+      >
+        Dashboard
+      </button>
     </header>
 
     <main>
