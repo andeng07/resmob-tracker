@@ -38,7 +38,7 @@
         "Class illustrations transformed to look like custom photostrip snapshots.",
       longDescription:
         "₱150 base rate for the first person + ₱50 for each additional person in the frame. Maximum of 4 people per photostrip snapshot.",
-      price: 150,
+      price: 100,
     },
     // {
     //   id: "tiedye",
@@ -134,7 +134,7 @@
     let description = selected.name;
 
     if (selected.id === "photobooth") {
-      description += ` (${photoboothPeopleCount} Pax)`;
+      description += ` (${photoboothPeopleCount} People)`;
     }
 
     if (selected.id === "canshoot") {
