@@ -217,6 +217,7 @@ export async function getRevenueFlow() {
             $dateToString: {
               format: "%Y-%m-%d %H:00",
               date: "$createdAt",
+              timezone: "Asia/Manila",
             },
           },
           revenue: {
