@@ -8,11 +8,4 @@ export const load: PageServerLoad = async ({ cookies, fetch }) => {
   if (!email) {
     throw redirect(302, "/login");
   }
-
-  const res = await fetch(`/api/users/${email}`);
-  const { user } = await res.json();
-
-  return {
-    user,
-  };
 };

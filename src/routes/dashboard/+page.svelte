@@ -94,7 +94,7 @@
   <!-- SIDEBAR -->
   <aside
     class={`
-      fixed md:static inset-y-0
+      fixed md:static inset-y-0 z-50
       w-72 md:w-64
       bg-white border-r border-gray-100 px-4 py-6
       flex flex-col

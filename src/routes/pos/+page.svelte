@@ -1,8 +1,10 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import type { AuthUser } from "$lib/server/auth";
   import type { Activity } from "$lib/server/transactions";
   import type { PageData } from "../$types";
+
+  let isConfirmEnabled = $state(true);
 
   let { data }: { data: PageData } = $props();
 
@@ -124,13 +126,15 @@
   }
 
   async function confirmTransaction() {
+    isConfirmEnabled = false;
+
     if (!selected || !user || (paymentMethod === "cash" && isCashInsufficient))
       return;
 
     let description = selected.name;
 
     if (selected.id === "photobooth") {
-      description += ` (${photoboothPeopleCount} People)`;
+      description += ` (${photoboothPeopleCount} Pax)`;
     }
 
     if (selected.id === "canshoot") {
@@ -175,6 +179,8 @@
       alert("Transaction has been added successfully.");
 
       closeModal();
+
+      isConfirmEnabled = true;
     } catch (error) {
       console.error(error);
       alert("Failed to save transaction.");
@@ -201,12 +207,14 @@
         ★ Point of Sales ★
       </p>
 
-      <button
-        class="absolute right-0 top-0 text-xs font-bold px-3 py-1 border border-red-500 text-red-600 rounded hover:bg-red-50"
-        onclick={() => goto("./dashboard")}
-      >
-        Dashboard
-      </button>
+      <div class="pt-2">
+        <button
+          class="text-xs font-bold px-3 py-1 border border-red-500 text-red-600 rounded hover:bg-red-50"
+          onclick={() => goto("./dashboard")}
+        >
+          Go to Dashboard
+        </button>
+      </div>
     </header>
 
     <main>
@@ -295,22 +303,22 @@
           <div class="space-y-1.5">
             <label
               class="text-[10px] font-black text-amber-700 uppercase tracking-widest"
-              for="photobooth-people">Admissions / Attendance</label
+              for="photobooth-people">People</label
             >
             <div class="grid grid-cols-4 gap-1.5" id="photobooth-people">
-              {#each [1, 2, 3, 4] as num}
+              {#each [1, 2] as option}
                 <button
                   type="button"
                   class="h-9 border-2 rounded-lg text-xs font-black transition {photoboothPeopleCount ===
-                  num
+                  option
                     ? 'border-red-600 bg-red-600 text-white'
                     : 'border-amber-100 text-slate-600 bg-white hover:bg-amber-50/50'}"
                   onclick={() => {
-                    photoboothPeopleCount = num;
+                    photoboothPeopleCount = option;
                   }}
                 >
-                  {num}
-                  {num === 1 ? "Pax" : "Pax"}
+                  {option}
+                  {option === 1 ? "" : "+"}
                 </button>
               {/each}
             </div>
@@ -428,10 +436,10 @@
           <button
             type="button"
             class="w-full h-11 rounded-lg font-black text-xs tracking-wider uppercase transition-all shadow-sm
-              {isDisabled
+              {isDisabled || !isConfirmEnabled
               ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
               : 'bg-amber-500 hover:bg-amber-600 active:translate-y-0.5 text-slate-950 border-b-4 border-amber-700'}"
-            disabled={isDisabled}
+            disabled={isDisabled || !isConfirmEnabled}
             onclick={confirmTransaction}
           >
             {isDisabled ? "★ Awaiting Payment ★" : "★ Dispatch Transaction ★"}
